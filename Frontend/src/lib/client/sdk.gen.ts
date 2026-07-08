@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { GetGroupData, GetGroupResponses, PostGroupData, PostGroupResponses } from './types.gen';
+import type { GetGroupData, GetGroupResponses, GetUsersMeData, GetUsersMeResponses, PostGroupData, PostGroupResponses, PostUsersMeRegisterData, PostUsersMeRegisterResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -28,3 +28,14 @@ export const postGroup = <ThrowOnError extends boolean = false>(options: Options
         ...options.headers
     }
 });
+
+export const postUsersMeRegister = <ThrowOnError extends boolean = false>(options: Options<PostUsersMeRegisterData, ThrowOnError>): RequestResult<PostUsersMeRegisterResponses, unknown, ThrowOnError> => (options.client ?? client).post<PostUsersMeRegisterResponses, unknown, ThrowOnError>({
+    url: '/users/me/register',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const getUsersMe = <ThrowOnError extends boolean = false>(options?: Options<GetUsersMeData, ThrowOnError>): RequestResult<GetUsersMeResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetUsersMeResponses, unknown, ThrowOnError>({ url: '/users/me', ...options });

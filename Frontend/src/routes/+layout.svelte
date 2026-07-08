@@ -5,11 +5,13 @@
 	let { children } = $props();
 </script>
 
-<svelte:head><link rel="icon" href={favicon} /></svelte:head>
+<svelte:head>
+    <link rel="icon" href={favicon} />
+    <title>CentraLM</title>
+</svelte:head>
 
 <Toaster/>
 
 <div class="absolute inset-0">
     {@render children()}
 </div>
-

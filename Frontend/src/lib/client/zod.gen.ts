@@ -3,7 +3,7 @@
 import * as z from 'zod';
 
 export const zCreateGroupDto = z.object({
-    name: z.string().min(1).max(100),
+    name: z.string(),
     description: z.string(),
     parentGroupId: z.string().nullish()
 });
@@ -11,6 +11,21 @@ export const zCreateGroupDto = z.object({
 export const zGroupListingDto = z.object({
     name: z.string(),
     description: z.string(),
+    id: z.string().optional(),
+    created: z.iso.datetime().optional()
+});
+
+export const zRegisterMeDto = z.object({
+    displayName: z.string(),
+    biography: z.string()
+});
+
+export const zUserType = z.int();
+
+export const zUserDto = z.object({
+    userType: zUserType,
+    displayName: z.string().optional(),
+    biography: z.string().optional(),
     id: z.string().optional(),
     created: z.iso.datetime().optional()
 });
@@ -33,3 +48,15 @@ export const zPostGroupBody = zCreateGroupDto;
  * OK
  */
 export const zPostGroupResponse = zGroupListingDto;
+
+export const zPostUsersMeRegisterBody = zRegisterMeDto;
+
+/**
+ * OK
+ */
+export const zPostUsersMeRegisterResponse = zUserDto;
+
+/**
+ * OK
+ */
+export const zGetUsersMeResponse = zUserDto;

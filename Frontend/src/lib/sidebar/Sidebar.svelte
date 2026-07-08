@@ -1,6 +1,6 @@
 ﻿<script lang="ts">
 	import { page } from "$app/state";
-    import {appState} from "$lib/auth.svelte";
+    import {authState} from "$lib/auth.svelte";
     import UserBadge from "$lib/sidebar/UserBadge.svelte";
     
     const links = [
@@ -28,9 +28,9 @@
     <div class="flex-row flex items-center container mx-auto">
         <div class="flex items-center gap-2">
             {#each links as link}
-                <a class:bg-base-100!={link.path == page.route.id} href="{link.path}" class="btn btn-ghost text-sm">{link.name}</a>
+                <a class:bg-base-100!={link.path === page.route.id} href="{link.path}" class="btn btn-ghost text-sm">{link.name}</a>
             {/each}
         </div>
-        <UserBadge user={appState.user!} />
+        <UserBadge user={authState.openIdUser} />
     </div>
 </div>

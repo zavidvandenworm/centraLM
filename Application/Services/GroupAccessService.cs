@@ -34,7 +34,7 @@ public class GroupAccessService(Context context)
             return Result.Ok();
         }
 
-        return isDirectMember || isMemberOfParent ? 
+        return isDirectMember || isMemberOfParent ?
             Result.Ok() : Result.Fail("Group does not exist, or user has no access.");
     }
 }

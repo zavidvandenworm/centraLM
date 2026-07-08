@@ -1,18 +1,17 @@
+using System.Security.Claims;
 using API.Endpoints;
 using Application;
 using Application.Pipelines;
 using dotenv.net;
 using Mediator;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsDevelopment())
-{
-    DotEnv.Load();
-}
+if (builder.Environment.IsDevelopment()) DotEnv.Load();
 
 builder.Services.AddSingleton(typeof(IPipelineBehavior<,>), typeof(ValidationPipeline<,>));
 builder.Services.AddOpenApi();
@@ -20,43 +19,47 @@ builder.Services.AddApplication();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy
-        .WithOrigins([Environment.GetEnvironmentVariable("PUBLIC_FRONTEND_URL")!])
-        .AllowAnyMethod().AllowCredentials()
+        .WithOrigins(Environment.GetEnvironmentVariable("PUBLIC_FRONTEND_URL")!)
+        .AllowAnyMethod().AllowCredentials().AllowAnyHeader()
     );
 });
 builder.Services.AddAuthentication(options =>
     {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     })
-    .AddCookie()
-    .AddOpenIdConnect(options =>
+    .AddJwtBearer(options =>
     {
         options.Authority = Environment.GetEnvironmentVariable("PUBLIC_OPENID_AUTHORITY");
-        options.ClientId = Environment.GetEnvironmentVariable("PUBLIC_OPENID_CLIENTID");
-        options.ClientSecret = Environment.GetEnvironmentVariable("OPENID_CLIENT_SECRET");
-        options.ResponseType = "code";
-        options.SaveTokens = true;
-        options.Scope.Add("profile");
-        options.Scope.Add("email");
+        options.Audience = Environment.GetEnvironmentVariable("PUBLIC_OPENID_CLIENTID");
     });
 
-builder.Services.AddAuthorization();
-var app = builder.Build();
-app.UseAuthentication();
-app.UseAuthorization();
-app.AddGroupEndpoints();
-app.UseCors();
-
-if (app.Environment.IsDevelopment())
+builder.Services.AddAuthorization(opts =>
 {
-    app.MapOpenApi();
-}
+    var requirements = opts.DefaultPolicy.Requirements.ToList();
+    requirements.Add(new ClaimsAuthorizationRequirement(ClaimTypes.NameIdentifier, null));
+    requirements.Add(new DenyAnonymousAuthorizationRequirement());
 
-app.MapScalarApiReference(options =>
-{
-    options.AddHttpAuthentication("BearerAuth", null!);
+    opts.DefaultPolicy =
+        new AuthorizationPolicy(requirements, opts.DefaultPolicy.AuthenticationSchemes);
 });
+var app = builder.Build();
 
 app.UseHttpsRedirection();
+app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.AddGroupEndpoints();
+app.AddUserEndpoints();
+
+app.UseExceptionHandler(exceptionHandlerApp
+    => exceptionHandlerApp.Run(async context
+        => await Results.Problem()
+            .ExecuteAsync(context)));
+
+if (app.Environment.IsDevelopment()) app.MapOpenApi();
+
+app.MapScalarApiReference();
+
 app.Run();

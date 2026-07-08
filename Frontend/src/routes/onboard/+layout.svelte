@@ -1,15 +1,20 @@
-<script lang="ts">
+﻿<script lang="ts">
     import {authState} from "$lib/auth.svelte";
-    import Sidebar from "$lib/sidebar/Sidebar.svelte";
     import AuthSync from "$lib/AuthSync.svelte";
+    import {goto} from "$app/navigation";
 	let { children } = $props();
+    
+    $effect(() => {
+        if (authState.authorized){
+            goto("/app")
+        }
+    })
     
 </script>
 
 <AuthSync/>
 
-{#if authState.authorized}
-    <Sidebar/>
+{#if authState.ready}
     {@render children()}
 {:else}
     <div class="absolute inset-0 flex items-center justify-center">

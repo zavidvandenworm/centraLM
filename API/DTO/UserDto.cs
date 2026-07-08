@@ -1,12 +1,10 @@
 ﻿using Domain.Enums;
+using Domain.Models;
 
-namespace Domain.Models;
+namespace API.DTO;
 
-public class User : Base
+public class UserDto : Base
 {
-    public required string OpenIdIssuer { get; set; }
-    public required string OpenIdSubject { get; set; }
-
     public required UserType UserType { get; set; }
     public string DisplayName { get; set; } = "User";
     public string Biography { get; set; } = "";

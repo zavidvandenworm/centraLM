@@ -1,6 +1,6 @@
 ﻿namespace Domain.Models;
 
-public class Project: Base
+public class Project : Base
 {
     public required Group Group { get; set; }
     public required string GroupId { get; set; }

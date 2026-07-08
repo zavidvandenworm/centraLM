@@ -21,7 +21,7 @@ public class ValidationPipeline<TRequest, TResponse>(IEnumerable<IValidator<TReq
         {
             return Result.Fail(failures.Select(f => f.ErrorMessage));
         }
-        
+
         return await next(message, cancellationToken);
     }
 }

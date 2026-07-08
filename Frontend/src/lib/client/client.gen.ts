@@ -2,7 +2,6 @@
 
 import { type Client, type ClientOptions, type Config, createClient, createConfig } from './client';
 import type { ClientOptions as ClientOptions2 } from './types.gen';
-import {env} from "$env/dynamic/public";
 
 /**
  * The `createClientConfig()` function will be called on client initialization
@@ -14,4 +13,4 @@ import {env} from "$env/dynamic/public";
  */
 export type CreateClientConfig<T extends ClientOptions = ClientOptions2> = (override?: Config<ClientOptions & T>) => Config<Required<ClientOptions> & T>;
 
-export const client: Client = createClient(createConfig<ClientOptions2>({ baseUrl: env.PUBLIC_API_URL }));
+export const client: Client = createClient(createConfig<ClientOptions2>({ baseUrl: 'http://localhost:5228/' }));

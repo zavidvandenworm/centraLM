@@ -1,22 +1,64 @@
 ﻿<script lang="ts">
-	import { client } from "./client/client.gen";
-    import {appState} from "$lib/auth.svelte";
+    import {client} from "./client/client.gen";
+    import {authState, userManager} from "$lib/auth.svelte";
     import {onMount} from "svelte";
-    import {env} from "$env/dynamic/public";
-    
-    $effect(() => {
-        console.log(env.PUBLIC_API_URL)
-        client.setConfig({
-            baseUrl: env.PUBLIC_API_URL
-        })
-    })
+    import {getUsersMe} from "$lib/client";
+    import {goto} from "$app/navigation";
 
     $effect(() => {
+        authState.authorized = authState.ready && !!authState.appUser && !!authState.openIdUser
+    })
+
+    function registerAuthEvents() {
+        userManager.events.addUserLoaded((user) => {
+            authState.openIdUser = user
+
+            client.setConfig({
+                headers: {
+                    Authorization: `Bearer ${user.access_token}`
+                }
+            })
+        })
+
+        userManager.events.addSilentRenewError((err) => {
+            client.setConfig({
+                headers: {
+                    Authorization: null
+                }
+            })
+        })
+    }
+
+    onMount(async () => {
+        const user = await userManager.getUser()
+
+        if (!user) {
+            authState.ready = true
+            await goto("/login")
+            return
+        }
+
         client.setConfig({
             headers: {
-                Authorization: `Bearer ${appState.user?.access_token}`
+                Authorization: `Bearer ${user.access_token}`
             }
         })
+
+        registerAuthEvents()
+        userManager.startSilentRenew()
+
+        authState.openIdUser = user
+
+        const result = await getUsersMe();
+
+        if (!result.data) {
+            authState.ready = true
+            await goto("/onboard")
+            return
+        }
+
+        authState.appUser = result.data
+        authState.ready = true
     })
 
 </script>

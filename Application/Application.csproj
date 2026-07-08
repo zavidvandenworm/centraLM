@@ -7,22 +7,23 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="FluentResults" Version="4.0.0" />
-      <PackageReference Include="FluentValidation" Version="12.1.1" />
-      <PackageReference Include="Mapster" Version="10.0.9" />
-      <PackageReference Include="Mediator.Abstractions" Version="3.0.2" />
-      <PackageReference Include="Mediator.SourceGenerator" Version="3.0.2">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
+        <PackageReference Include="FluentResults" Version="4.0.0"/>
+        <PackageReference Include="FluentValidation" Version="12.1.1"/>
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1"/>
+        <PackageReference Include="Mapster" Version="10.0.9"/>
+        <PackageReference Include="Mediator.Abstractions" Version="3.0.2"/>
+        <PackageReference Include="Mediator.SourceGenerator" Version="3.0.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+        <ProjectReference Include="..\Infrastructure\Infrastructure.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Projects\Validators\" />
+        <Folder Include="Projects\Validators\"/>
     </ItemGroup>
 
 </Project>

@@ -17,6 +17,21 @@ export type GroupListingDto = {
     created?: string;
 };
 
+export type RegisterMeDto = {
+    displayName: string;
+    biography: string;
+};
+
+export type UserDto = {
+    userType: UserType;
+    displayName?: string;
+    biography?: string;
+    id?: string;
+    created?: string;
+};
+
+export type UserType = number;
+
 export type GetGroupData = {
     body?: never;
     path?: never;
@@ -50,3 +65,35 @@ export type PostGroupResponses = {
 };
 
 export type PostGroupResponse = PostGroupResponses[keyof PostGroupResponses];
+
+export type PostUsersMeRegisterData = {
+    body: RegisterMeDto;
+    path?: never;
+    query?: never;
+    url: '/users/me/register';
+};
+
+export type PostUsersMeRegisterResponses = {
+    /**
+     * OK
+     */
+    200: UserDto;
+};
+
+export type PostUsersMeRegisterResponse = PostUsersMeRegisterResponses[keyof PostUsersMeRegisterResponses];
+
+export type GetUsersMeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/users/me';
+};
+
+export type GetUsersMeResponses = {
+    /**
+     * OK
+     */
+    200: UserDto;
+};
+
+export type GetUsersMeResponse = GetUsersMeResponses[keyof GetUsersMeResponses];
