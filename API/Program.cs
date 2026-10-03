@@ -1,20 +1,64 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using API.Endpoints;
+using API.Extensions;
 using Application;
-using Application.Pipelines;
-using dotenv.net;
-using Mediator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.OpenApi;
 using Scalar.AspNetCore;
+
+EnvironmentExtensions.LoadDotEnv(args);
+EnvironmentExtensions.ValidateRequiredVariables();
+await EnvironmentExtensions.ValidateOpenIdAuthorityAsync();
+
+const string BearerSchemeName = "Bearer";
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (builder.Environment.IsDevelopment()) DotEnv.Load();
 
-builder.Services.AddSingleton(typeof(IPipelineBehavior<,>), typeof(ValidationPipeline<,>));
-builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<FluentValidationExceptionHandler>();
+builder.Services.AddResultQueryValidation();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, _, _) =>
+    {
+        document.Components ??= new OpenApiComponents();
+        document.Components.SecuritySchemes ??=
+            new Dictionary<string, IOpenApiSecurityScheme>();
+        document.Components.SecuritySchemes[BearerSchemeName] = new OpenApiSecurityScheme
+        {
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "OpenID Connect access token issued by the configured authority."
+        };
+        return Task.CompletedTask;
+    });
+
+    options.AddOperationTransformer((operation, context, _) =>
+    {
+        var requiresAuthorization = context.Description.ActionDescriptor.EndpointMetadata
+            .OfType<IAuthorizeData>()
+            .Any();
+
+        if (requiresAuthorization)
+        {
+            operation.Security =
+            [
+                new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference(BearerSchemeName, context.Document)] = []
+                }
+            ];
+        }
+
+        return Task.CompletedTask;
+    });
+});
 builder.Services.AddApplication();
 builder.Services.AddCors(options =>
 {
@@ -32,6 +76,20 @@ builder.Services.AddAuthentication(options =>
     {
         options.Authority = Environment.GetEnvironmentVariable("PUBLIC_OPENID_AUTHORITY");
         options.Audience = Environment.GetEnvironmentVariable("PUBLIC_OPENID_CLIENTID");
+        options.TokenValidationParameters.ValidIssuer = options.Authority;
+
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                context.HttpContext.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger("JwtBearer")
+                    .LogError(context.Exception,
+                        "Token validation failed for {Path}", context.Request.Path);
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization(opts =>
@@ -45,7 +103,8 @@ builder.Services.AddAuthorization(opts =>
 });
 var app = builder.Build();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment()) app.UseHttpsRedirection();
+
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -53,10 +112,7 @@ app.UseAuthorization();
 app.AddGroupEndpoints();
 app.AddUserEndpoints();
 
-app.UseExceptionHandler(exceptionHandlerApp
-    => exceptionHandlerApp.Run(async context
-        => await Results.Problem()
-            .ExecuteAsync(context)));
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment()) app.MapOpenApi();
 

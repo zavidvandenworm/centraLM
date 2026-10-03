@@ -1,64 +1,74 @@
-﻿<script lang="ts">
-    import {client} from "./client/client.gen";
-    import {authState, userManager} from "$lib/auth.svelte";
-    import {onMount} from "svelte";
-    import {getUsersMe} from "$lib/client";
-    import {goto} from "$app/navigation";
+<script lang="ts">
+	import { client } from './client/client.gen';
+	import { authState, userManager } from '$lib/auth.svelte';
+	import { onMount } from 'svelte';
+	import { getUsersMe } from '$lib/client';
+	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
-    $effect(() => {
-        authState.authorized = authState.ready && !!authState.appUser && !!authState.openIdUser
-    })
+	client.setConfig({
+		auth: async () => (await userManager.getUser())?.access_token
+	});
 
-    function registerAuthEvents() {
-        userManager.events.addUserLoaded((user) => {
-            authState.openIdUser = user
+	function clearAuth() {
+		authState.openIdUser = null;
+		authState.appUser = null;
+		authState.authorized = false;
+	}
 
-            client.setConfig({
-                headers: {
-                    Authorization: `Bearer ${user.access_token}`
-                }
-            })
-        })
+	async function redirectToLogin() {
+		clearAuth();
+		await goto(resolve('/login'));
+	}
 
-        userManager.events.addSilentRenewError((err) => {
-            client.setConfig({
-                headers: {
-                    Authorization: null
-                }
-            })
-        })
-    }
+	function registerAuthEvents() {
+		userManager.events.addUserLoaded((user) => {
+			authState.openIdUser = user;
+		});
 
-    onMount(async () => {
-        const user = await userManager.getUser()
+		userManager.events.addAccessTokenExpiring(() => {
+			void redirectToLogin();
+		});
 
-        if (!user) {
-            authState.ready = true
-            await goto("/login")
-            return
-        }
+		userManager.events.addUserUnloaded(() => {
+			void redirectToLogin();
+		});
 
-        client.setConfig({
-            headers: {
-                Authorization: `Bearer ${user.access_token}`
-            }
-        })
+		userManager.events.addUserSignedOut(() => {
+			void redirectToLogin();
+		});
+	}
 
-        registerAuthEvents()
-        userManager.startSilentRenew()
+	onMount(async () => {
+		const user = await userManager.getUser();
 
-        authState.openIdUser = user
+		if (!user || user.expired) {
+			authState.ready = true;
+			await goto(resolve('/login'));
+			return;
+		}
 
-        const result = await getUsersMe();
+		registerAuthEvents();
+		authState.openIdUser = user;
 
-        if (!result.data) {
-            authState.ready = true
-            await goto("/onboard")
-            return
-        }
+		const result = await getUsersMe();
 
-        authState.appUser = result.data
-        authState.ready = true
-    })
+		if (result.error) {
+			if (result.response?.status === 404) {
+				authState.ready = true;
+				await goto(resolve('/onboard'));
+				return;
+			}
 
+			await redirectToLogin();
+			return;
+		}
+
+		authState.appUser = result.data ?? null;
+		authState.ready = true;
+	});
+
+	$effect(() => {
+		authState.authorized = authState.ready && !!authState.appUser && !!authState.openIdUser;
+	});
 </script>

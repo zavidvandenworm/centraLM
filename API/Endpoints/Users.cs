@@ -1,5 +1,6 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using API.DTO;
+using API.Extensions;
 using Application.Extensions;
 using Application.Users.Commands;
 using Mapster;
@@ -18,8 +19,10 @@ public static class Users
         {
             var subIss = claims.GetSubIss();
             var result = await mediator.Send(new RegisterMeQuery(subIss.Subject, subIss.Issuer, registerMeDto.DisplayName, registerMeDto.Biography));
-            return result.IsSuccess ? Results.Ok(result.Value.Adapt<UserDto>()) : Results.BadRequest(result.Errors);
-        }).Produces<UserDto>();
+            return result.IsSuccess
+                ? Results.Ok(result.Value.Adapt<UserDto>())
+                : result.ToProblemDetails();
+        }).Produces<UserDto>().ProducesValidationProblem();
 
         group.MapGet("me", async (ClaimsPrincipal claims, IMediator mediator) =>
         {

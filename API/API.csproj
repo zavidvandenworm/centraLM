@@ -11,7 +11,7 @@
         <PackageReference Include="Mapster" Version="10.0.9" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.9" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12"/>
         <PackageReference Include="Scalar.AspNetCore" Version="2.16.6" />
     </ItemGroup>
 
@@ -21,6 +21,13 @@
 
     <ItemGroup>
       <Folder Include="Extensions\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include=".env" Condition="Exists('.env')">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

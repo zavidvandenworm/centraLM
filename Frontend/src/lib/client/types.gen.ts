@@ -17,6 +17,17 @@ export type GroupListingDto = {
     created?: string;
 };
 
+export type HttpValidationProblemDetails = {
+    type?: null | string;
+    title?: null | string;
+    status?: null | number | string;
+    detail?: null | string;
+    instance?: null | string;
+    errors?: {
+        [key: string]: Array<string>;
+    };
+};
+
 export type RegisterMeDto = {
     displayName: string;
     biography: string;
@@ -43,12 +54,14 @@ export type GetGroupData = {
     url: '/group';
 };
 
-export type GetGroupResponses = {
+export type GetGroupErrors = {
     /**
-     * OK
+     * Bad Request
      */
-    200: unknown;
+    400: HttpValidationProblemDetails;
 };
+
+export type GetGroupError = GetGroupErrors[keyof GetGroupErrors];
 
 export type PostGroupData = {
     body: CreateGroupDto;
@@ -56,6 +69,15 @@ export type PostGroupData = {
     query?: never;
     url: '/group';
 };
+
+export type PostGroupErrors = {
+    /**
+     * Bad Request
+     */
+    400: HttpValidationProblemDetails;
+};
+
+export type PostGroupError = PostGroupErrors[keyof PostGroupErrors];
 
 export type PostGroupResponses = {
     /**
@@ -72,6 +94,15 @@ export type PostUsersMeRegisterData = {
     query?: never;
     url: '/users/me/register';
 };
+
+export type PostUsersMeRegisterErrors = {
+    /**
+     * Bad Request
+     */
+    400: HttpValidationProblemDetails;
+};
+
+export type PostUsersMeRegisterError = PostUsersMeRegisterErrors[keyof PostUsersMeRegisterErrors];
 
 export type PostUsersMeRegisterResponses = {
     /**

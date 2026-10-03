@@ -1,5 +1,6 @@
-﻿using API.DTO;
+using API.DTO;
 using API.EndpointFilters;
+using API.Extensions;
 using API.Models;
 using Application.Groups.Commands;
 using Application.Services;
@@ -24,9 +25,9 @@ public static class Groups
 
             var result = await mediator.Send(cmd);
             return result.IsFailed ?
-                Results.BadRequest(result.Errors) :
+                result.ToProblemDetails() :
                 Results.Ok(result.Value.Adapt<GroupListingDto>());
-        }).Produces<GroupListingDto>();
+        }).Produces<GroupListingDto>().ProducesValidationProblem();
 
         group.MapGet("/",
             async (int skip, int limit, string? parentGroupId, IMediator mediator, AuthUser user) =>
@@ -35,8 +36,8 @@ public static class Groups
                 var result = await mediator.Send(cmd);
 
                 return result.IsFailed
-                    ? Results.BadRequest(result.Errors)
+                    ? result.ToProblemDetails()
                     : Results.Ok(result.Value.Adapt<List<GroupListingDto>>());
-            });
+            }).ProducesValidationProblem();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Application.Extensions;
+using Application.Interfaces;
 using Application.Services;
 using Domain.Models;
 using FluentResults;
@@ -9,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Application.Groups.Commands;
 
-public sealed record GetGroupsQuery(string UserId, int Skip, int Limit, string? ParentId) : IQuery<Result<List<Group>>>;
+public sealed record GetGroupsQuery(string UserId, int Skip, int Limit, string? ParentId) : IResultQuery<List<Group>>;
 
 public sealed class GetGroupsValidator : AbstractValidator<GetGroupsQuery>
 {

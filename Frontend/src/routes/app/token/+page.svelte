@@ -1,5 +1,5 @@
-﻿<script>
-    import {appState} from "$lib/auth.svelte";
+<script>
+	import { authState } from '$lib/auth.svelte';
 </script>
 
-{appState.openIdUser?.access_token}
+{authState.openIdUser?.access_token}

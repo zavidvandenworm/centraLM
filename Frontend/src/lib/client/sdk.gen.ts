@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { GetGroupData, GetGroupResponses, GetUsersMeData, GetUsersMeResponses, PostGroupData, PostGroupResponses, PostUsersMeRegisterData, PostUsersMeRegisterResponses } from './types.gen';
+import type { GetGroupData, GetGroupErrors, GetUsersMeData, GetUsersMeResponses, PostGroupData, PostGroupErrors, PostGroupResponses, PostUsersMeRegisterData, PostUsersMeRegisterErrors, PostUsersMeRegisterResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -18,9 +18,14 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
 
-export const getGroup = <ThrowOnError extends boolean = false>(options: Options<GetGroupData, ThrowOnError>): RequestResult<GetGroupResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetGroupResponses, unknown, ThrowOnError>({ url: '/group', ...options });
+export const getGroup = <ThrowOnError extends boolean = false>(options: Options<GetGroupData, ThrowOnError>): RequestResult<unknown, GetGroupErrors, ThrowOnError> => (options.client ?? client).get<unknown, GetGroupErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/group',
+    ...options
+});
 
-export const postGroup = <ThrowOnError extends boolean = false>(options: Options<PostGroupData, ThrowOnError>): RequestResult<PostGroupResponses, unknown, ThrowOnError> => (options.client ?? client).post<PostGroupResponses, unknown, ThrowOnError>({
+export const postGroup = <ThrowOnError extends boolean = false>(options: Options<PostGroupData, ThrowOnError>): RequestResult<PostGroupResponses, PostGroupErrors, ThrowOnError> => (options.client ?? client).post<PostGroupResponses, PostGroupErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/group',
     ...options,
     headers: {
@@ -29,7 +34,8 @@ export const postGroup = <ThrowOnError extends boolean = false>(options: Options
     }
 });
 
-export const postUsersMeRegister = <ThrowOnError extends boolean = false>(options: Options<PostUsersMeRegisterData, ThrowOnError>): RequestResult<PostUsersMeRegisterResponses, unknown, ThrowOnError> => (options.client ?? client).post<PostUsersMeRegisterResponses, unknown, ThrowOnError>({
+export const postUsersMeRegister = <ThrowOnError extends boolean = false>(options: Options<PostUsersMeRegisterData, ThrowOnError>): RequestResult<PostUsersMeRegisterResponses, PostUsersMeRegisterErrors, ThrowOnError> => (options.client ?? client).post<PostUsersMeRegisterResponses, PostUsersMeRegisterErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
     url: '/users/me/register',
     ...options,
     headers: {
@@ -38,4 +44,8 @@ export const postUsersMeRegister = <ThrowOnError extends boolean = false>(option
     }
 });
 
-export const getUsersMe = <ThrowOnError extends boolean = false>(options?: Options<GetUsersMeData, ThrowOnError>): RequestResult<GetUsersMeResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetUsersMeResponses, unknown, ThrowOnError>({ url: '/users/me', ...options });
+export const getUsersMe = <ThrowOnError extends boolean = false>(options?: Options<GetUsersMeData, ThrowOnError>): RequestResult<GetUsersMeResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetUsersMeResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/users/me',
+    ...options
+});

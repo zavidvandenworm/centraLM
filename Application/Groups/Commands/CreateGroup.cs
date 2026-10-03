@@ -1,4 +1,4 @@
-﻿using Application.Services;
+using Application.Services;
 using Application.Utilities;
 using Domain.Enums;
 using Domain.Models;
@@ -16,7 +16,7 @@ public sealed class CreateGroupCommandValidator : AbstractValidator<CreateGroupC
     public CreateGroupCommandValidator()
     {
         RuleFor(x => x.Description).MaximumLength(2000);
-        RuleFor(x => x.Name).Length(1, 100).NotEmpty();
+        RuleFor(x => x.Name).NotEmpty().Length(1, 100);
     }
 }
 

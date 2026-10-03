@@ -15,6 +15,18 @@ export const zGroupListingDto = z.object({
     created: z.iso.datetime().optional()
 });
 
+export const zHttpValidationProblemDetails = z.object({
+    type: z.string().nullish(),
+    title: z.string().nullish(),
+    status: z.union([
+        z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }),
+        z.string().regex(/^-?(?:0|[1-9]\d*)$/)
+    ]).nullish(),
+    detail: z.string().nullish(),
+    instance: z.string().nullish(),
+    errors: z.record(z.string(), z.array(z.string())).optional()
+});
+
 export const zRegisterMeDto = z.object({
     displayName: z.string(),
     biography: z.string()

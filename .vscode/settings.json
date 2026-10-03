@@ -1,0 +1,9 @@
+{
+    "dotrush.roslyn.projectOrSolutionFiles": [
+        "/home/zavid/RiderProjects/centraLM/centraLM.sln",
+        "/home/zavid/RiderProjects/centraLM/API/API.csproj",
+        "/home/zavid/RiderProjects/centraLM/Application/Application.csproj",
+        "/home/zavid/RiderProjects/centraLM/Domain/Domain.csproj",
+        "/home/zavid/RiderProjects/centraLM/Infrastructure/Infrastructure.csproj"
+    ]
+}
