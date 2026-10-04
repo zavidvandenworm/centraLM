@@ -17,6 +17,8 @@ export type GroupListingDto = {
     created?: string;
 };
 
+export type GroupSortDirection = number;
+
 export type HttpValidationProblemDetails = {
     type?: null | string;
     title?: null | string;
@@ -47,9 +49,11 @@ export type GetGroupData = {
     body?: never;
     path?: never;
     query: {
-        skip: number | string;
-        limit: number | string;
-        parentGroupId?: string;
+        Skip: number | string;
+        Limit: number | string;
+        ParentGroupId?: string;
+        Keyword?: string;
+        SortByCreated: GroupSortDirection;
     };
     url: '/group';
 };
@@ -62,6 +66,15 @@ export type GetGroupErrors = {
 };
 
 export type GetGroupError = GetGroupErrors[keyof GetGroupErrors];
+
+export type GetGroupResponses = {
+    /**
+     * OK
+     */
+    200: Array<GroupListingDto>;
+};
+
+export type GetGroupResponse = GetGroupResponses[keyof GetGroupResponses];
 
 export type PostGroupData = {
     body: CreateGroupDto;

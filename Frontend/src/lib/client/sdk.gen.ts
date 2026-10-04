@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { GetGroupData, GetGroupErrors, GetUsersMeData, GetUsersMeResponses, PostGroupData, PostGroupErrors, PostGroupResponses, PostUsersMeRegisterData, PostUsersMeRegisterErrors, PostUsersMeRegisterResponses } from './types.gen';
+import type { GetGroupData, GetGroupErrors, GetGroupResponses, GetUsersMeData, GetUsersMeResponses, PostGroupData, PostGroupErrors, PostGroupResponses, PostUsersMeRegisterData, PostUsersMeRegisterErrors, PostUsersMeRegisterResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -18,7 +18,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
 
-export const getGroup = <ThrowOnError extends boolean = false>(options: Options<GetGroupData, ThrowOnError>): RequestResult<unknown, GetGroupErrors, ThrowOnError> => (options.client ?? client).get<unknown, GetGroupErrors, ThrowOnError>({
+export const getGroup = <ThrowOnError extends boolean = false>(options: Options<GetGroupData, ThrowOnError>): RequestResult<GetGroupResponses, GetGroupErrors, ThrowOnError> => (options.client ?? client).get<GetGroupResponses, GetGroupErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/group',
     ...options

@@ -2,15 +2,15 @@
 
 public static class PathUtilities
 {
-    private const string PathSeparator = "/";
+    public const string Separator = "/";
 
     public static string Combine(params string[] paths)
     {
-        return string.Join(PathSeparator, paths);
+        return string.Join(Separator, paths);
     }
 
     public static string AddIdToPath(string path, string id)
     {
-        return path + PathSeparator + id;
+        return path + Separator + id;
     }
 }

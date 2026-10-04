@@ -1,4 +1,5 @@
-﻿using FluentResults;
+﻿using Application.Utilities;
+using FluentResults;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,33 +9,26 @@ public class GroupAccessService(Context context)
 {
     public async Task<Result> CanAccess(string userId, string groupId)
     {
-        var pathGroups = await context.Groups
+        var targetGroup = await context.Groups
             .AsNoTracking()
-            .Include(g => g.GroupMembers)
-            .Select(g => new
-            {
-                g.Id,
-                g.Path,
-                GroupMembers = g.GroupMembers.Select(gm => gm.UserId)
-            })
-            .Where(g => g.Path.Contains(groupId))
-            .ToListAsync();
+            .Where(g => g.Id == groupId)
+            .Select(g => new { g.Id, g.Path })
+            .FirstOrDefaultAsync();
 
-        var isDirectMember = pathGroups
-            .Any(g => g.Id == groupId && g.GroupMembers.Any(mid => mid == userId));
-
-        var isMemberOfParent = pathGroups.Any(g =>
+        if (targetGroup is null)
         {
-            var split = g.Path.Split("/");
-            return split.IndexOf(groupId) > split.IndexOf(g.Id);
-        });
-
-        if (isDirectMember || isMemberOfParent)
-        {
-            return Result.Ok();
+            return Result.Fail("Group does not exist, or user has no access.");
         }
 
-        return isDirectMember || isMemberOfParent ?
-            Result.Ok() : Result.Fail("Group does not exist, or user has no access.");
+        var targetPath = targetGroup.Path;
+
+        var canAccess = await context.Groups
+            .AsNoTracking()
+            .AnyAsync(g => g.GroupMembers.Any(gm => gm.UserId == userId) &&
+                           (g.Id == groupId || targetPath.StartsWith(g.Path + PathUtilities.Separator)));
+
+        return canAccess
+            ? Result.Ok()
+            : Result.Fail("Group does not exist, or user has no access.");
     }
 }

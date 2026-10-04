@@ -30,14 +30,19 @@ public static class Groups
         }).Produces<GroupListingDto>().ProducesValidationProblem();
 
         group.MapGet("/",
-            async (int skip, int limit, string? parentGroupId, IMediator mediator, AuthUser user) =>
+            async ([AsParameters] GetGroupsDto getGroupsDto, IMediator mediator, AuthUser user) =>
             {
-                var cmd = new GetGroupsQuery(user.Id, skip, limit, parentGroupId);
+                var cmd = getGroupsDto.Adapt<GetGroupsQuery>() with
+                {
+                    ParentGroupId = getGroupsDto.ParentGroupId,
+                    UserId = user.Id
+                };
+
                 var result = await mediator.Send(cmd);
 
                 return result.IsFailed
                     ? result.ToProblemDetails()
                     : Results.Ok(result.Value.Adapt<List<GroupListingDto>>());
-            }).ProducesValidationProblem();
+            }).Produces<List<GroupListingDto>>().ProducesValidationProblem();
     }
 }

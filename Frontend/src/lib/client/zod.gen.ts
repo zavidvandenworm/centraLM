@@ -15,6 +15,8 @@ export const zGroupListingDto = z.object({
     created: z.iso.datetime().optional()
 });
 
+export const zGroupSortDirection = z.int();
+
 export const zHttpValidationProblemDetails = z.object({
     type: z.string().nullish(),
     title: z.string().nullish(),
@@ -43,16 +45,23 @@ export const zUserDto = z.object({
 });
 
 export const zGetGroupQuery = z.object({
-    skip: z.union([
+    Skip: z.union([
         z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }),
         z.string().regex(/^-?(?:0|[1-9]\d*)$/)
     ]),
-    limit: z.union([
+    Limit: z.union([
         z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }),
         z.string().regex(/^-?(?:0|[1-9]\d*)$/)
     ]),
-    parentGroupId: z.string().optional()
+    ParentGroupId: z.string().optional(),
+    Keyword: z.string().optional(),
+    SortByCreated: zGroupSortDirection
 });
+
+/**
+ * OK
+ */
+export const zGetGroupResponse = z.array(zGroupListingDto);
 
 export const zPostGroupBody = zCreateGroupDto;
 
